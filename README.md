@@ -4,7 +4,7 @@
 
 To install cli, simply run:
 ```
-go get github.com/akm/pubsub-devsub
+go get github.com/groovenauts/pubsub-devsub
 ```
 
 Make sure your PATH includes the $GOPATH/bin directory so your commands can be easily used:
@@ -18,7 +18,7 @@ export PATH=$PATH:$GOPATH/bin
 ```bash
 $ pubsub-devsub
 NAME:
-   pubsub-devsub - github.com/akm/pubsub-devsub
+   pubsub-devsub - github.com/groovenauts/pubsub-devsub
 
 USAGE:
    pubsub-devsub [global options] command [command options] [arguments...]
