@@ -16,7 +16,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "pubsub-devsub"
-	app.Usage = "github.com/akm/pubsub-devsub"
+	app.Usage = "github.com/groovenauts/pubsub-devsub"
 	app.Version = Version
 
   app.Flags = []cli.Flag {
