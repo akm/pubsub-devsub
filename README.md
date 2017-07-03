@@ -13,6 +13,12 @@ Make sure your PATH includes the $GOPATH/bin directory so your commands can be e
 export PATH=$PATH:$GOPATH/bin
 ```
 
+# pubsub-devsub
+
+## Installation
+
+Download the file from https://github.com/groovenauts/pubsub-devsub/releases and put it somewhere on PATH.
+
 ## Usage
 
 ```bash
@@ -39,25 +45,13 @@ GLOBAL OPTIONS:
 
 ## How to biuld
 
-At first, install gom.
 ```
-go get github.com/mattn/gom
-```
-
-Build for current platform
-
-```
-gom build
+$ make setup
+$ make build
 ```
 
 ## Release
 
 ```
-$ rm -rf pkg/
-$ mkdir -p pkg/
-$ vendor/bin/gox -output="pkg/{{.Dir}}_{{.OS}}_{{.Arch}}"
-$ export VERSION=[v0.0.1]
-$ vendor/bin/ghr $VERSION pkg/
-$ git tag $VERSION
-$ git push origin --tags
+$ make release
 ```
