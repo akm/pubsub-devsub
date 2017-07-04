@@ -8,9 +8,9 @@ import (
 
 	"github.com/urfave/cli"
 
+	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
-	"cloud.google.com/go/pubsub"
 )
 
 func main() {
@@ -19,23 +19,23 @@ func main() {
 	app.Usage = "github.com/groovenauts/pubsub-devsub"
 	app.Version = Version
 
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name: "project",
-      Usage: "GCS Project ID",
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "project",
+			Usage:  "GCS Project ID",
 			EnvVar: "GCP_PROJECT,PROJECT",
-    },
-    cli.StringFlag{
-      Name: "subscription",
-      Usage: "Subscription",
+		},
+		cli.StringFlag{
+			Name:   "subscription",
+			Usage:  "Subscription",
 			EnvVar: "SUBSCRIPTION",
-    },
-    cli.UintFlag{
-      Name: "interval",
-      Value: 10,
-      Usage: "Interval to pull",
-    },
-  }
+		},
+		cli.UintFlag{
+			Name:  "interval",
+			Value: 10,
+			Usage: "Interval to pull",
+		},
+	}
 
 	app.Action = executeCommand
 
@@ -58,7 +58,7 @@ func executeCommand(c *cli.Context) error {
 		os.Exit(1)
 	}
 	sub := client.Subscription(subscription)
-	for ;; {
+	for {
 		it, err := sub.Pull(ctx)
 		if err != nil {
 			fmt.Println("Failed to pull from ", subscription, " cause of ", err)
@@ -67,7 +67,7 @@ func executeCommand(c *cli.Context) error {
 		// Ensure that the iterator is closed down cleanly.
 		defer it.Stop()
 
-		for ;; {
+		for {
 			m, err := it.Next()
 			if err == iterator.Done {
 				break
