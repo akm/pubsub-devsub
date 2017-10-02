@@ -28,13 +28,13 @@ func (p *Puller) Setup() {
 
 func (p *Puller) Run() error {
 	if p.Follow {
-		return p.Follow()
+		return p.Subscribe()
 	} else {
 		return p.Execute()
 	}
 }
 
-func (p *Puller) Follow() error {
+func (p *Puller) Subscribe() error {
 	for {
 		err := p.Execute()
 		if err != nil {
