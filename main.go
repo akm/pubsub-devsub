@@ -50,7 +50,10 @@ func main() {
 		},
 	}
 
-	app.Action = executeCommand
+	app.Action = func(c *cli.Context) error {
+		puller := buildPuller(c)
+		return puller.Run()
+	}
 
 	app.Run(os.Args)
 }
@@ -105,9 +108,4 @@ func buildPuller(c *cli.Context) *Puller {
 	}
 	puller.Setup()
 	return puller
-}
-
-func executeCommand(c *cli.Context) error {
-	puller := buildPuller(c)
-	return puller.Run()
 }
