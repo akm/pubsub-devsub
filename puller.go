@@ -10,6 +10,7 @@ import (
 
 type Puller struct {
 	SubscriptionsService *pubsub.ProjectsSubscriptionsService
+	Ack                  bool
 	Fqn                  string
 	Interval             int
 	pullRequest          *pubsub.PullRequest
@@ -50,9 +51,11 @@ func (p *Puller) Execute() error {
 		}
 		fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
 
-		err = p.Acknowledge(recvMsg.AckId)
-		if err != nil {
-			return err
+		if p.Ack {
+			err = p.Acknowledge(recvMsg.AckId)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

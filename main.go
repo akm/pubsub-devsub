@@ -30,6 +30,10 @@ func main() {
 			Name:  "follow,f",
 			Usage: "Keep subscribing",
 		},
+		cli.BoolFlag{
+			Name:  "ack,A",
+			Usage: "Send ACK for received message",
+		},
 		cli.UintFlag{
 			Name:  "interval",
 			Value: 10,
@@ -83,6 +87,7 @@ func executeCommand(c *cli.Context) error {
 
 	puller := &Puller{
 		SubscriptionsService: pubsubService.Projects.Subscriptions,
+		Ack:                  c.Bool("follow"),
 		Fqn:                  fqn,
 		Interval:             int(c.Uint("interval")),
 	}
