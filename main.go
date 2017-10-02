@@ -78,9 +78,9 @@ func executeCommand(c *cli.Context) error {
 	}
 
 	puller := &Puller{
-		subscriptionsService: pubsubService.Projects.Subscriptions,
-		fqn:                  fqn,
-		interval:             int(c.Uint("interval")),
+		SubscriptionsService: pubsubService.Projects.Subscriptions,
+		Fqn:                  fqn,
+		Interval:             int(c.Uint("interval")),
 	}
 	return puller.Follow()
 }

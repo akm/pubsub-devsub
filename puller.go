@@ -9,9 +9,9 @@ import (
 )
 
 type Puller struct {
-	subscriptionsService *pubsub.ProjectsSubscriptionsService
-	fqn                  string
-	interval             int
+	SubscriptionsService *pubsub.ProjectsSubscriptionsService
+	Fqn                  string
+	Interval             int
 }
 
 func (p *Puller) Follow() error {
@@ -20,9 +20,9 @@ func (p *Puller) Follow() error {
 		MaxMessages:       1,
 	}
 	for {
-		res, err := p.subscriptionsService.Pull(p.fqn, pullRequest).Do()
+		res, err := p.SubscriptionsService.Pull(p.Fqn, pullRequest).Do()
 		if err != nil {
-			fmt.Printf("Failed to pull from %v cause of %v\n", p.fqn, err)
+			fmt.Printf("Failed to pull from %v cause of %v\n", p.Fqn, err)
 			return err
 		}
 
@@ -39,13 +39,13 @@ func (p *Puller) Follow() error {
 			ackRequest := &pubsub.AcknowledgeRequest{
 				AckIds: []string{recvMsg.AckId},
 			}
-			_, err = p.subscriptionsService.Acknowledge(p.fqn, ackRequest).Do()
+			_, err = p.SubscriptionsService.Acknowledge(p.Fqn, ackRequest).Do()
 			if err != nil {
-				fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.fqn, err)
+				fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.Fqn, err)
 				return err
 			}
 		}
 
-		time.Sleep(time.Duration(p.interval) * time.Second)
+		time.Sleep(time.Duration(p.Interval) * time.Second)
 	}
 }
