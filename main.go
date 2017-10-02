@@ -2,11 +2,9 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/urfave/cli"
 
@@ -63,7 +61,7 @@ func buildFqn(c *cli.Context) string {
 func executeCommand(c *cli.Context) error {
 	fqn := buildFqn(c)
 
-	interval := c.Uint("interval")
+	interval := int(c.Uint("interval"))
 
 	ctx := context.Background()
 
@@ -82,37 +80,10 @@ func executeCommand(c *cli.Context) error {
 	}
 	subscriptionsService := pubsubService.Projects.Subscriptions
 
-	pullRequest := &pubsub.PullRequest{
-		ReturnImmediately: false,
-		MaxMessages:       1,
+	puller := &Puller{
+		subscriptionsService: subscriptionsService,
+		fqn:                  fqn,
+		interval:             interval,
 	}
-	for {
-		res, err := subscriptionsService.Pull(fqn, pullRequest).Do()
-		if err != nil {
-			fmt.Printf("Failed to pull from %v cause of %v\n", fqn, err)
-			return err
-		}
-
-		for _, recvMsg := range res.ReceivedMessages {
-			m := recvMsg.Message
-			var decodedData string
-			decoded, err := base64.StdEncoding.DecodeString(m.Data)
-			if err != nil {
-				decodedData = fmt.Sprintf("Failed to decode data by base64 because of %v", err)
-			} else {
-				decodedData = string(decoded)
-			}
-			fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
-			ackRequest := &pubsub.AcknowledgeRequest{
-				AckIds: []string{recvMsg.AckId},
-			}
-			_, err = subscriptionsService.Acknowledge(fqn, ackRequest).Do()
-			if err != nil {
-				fmt.Printf("Failed to Acknowledge to %v cause of %v\n", fqn, err)
-				return err
-			}
-		}
-
-		time.Sleep(time.Duration(interval) * time.Second)
-	}
+	return puller.Follow()
 }
