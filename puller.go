@@ -11,6 +11,7 @@ import (
 type Puller struct {
 	SubscriptionsService *pubsub.ProjectsSubscriptionsService
 	Ack                  bool
+	Follow               bool
 	Fqn                  string
 	Interval             int
 	MaxMessages          int64
@@ -22,6 +23,14 @@ func (p *Puller) Setup() {
 	p.pullRequest = &pubsub.PullRequest{
 		ReturnImmediately: p.ReturnImmediately,
 		MaxMessages:       p.MaxMessages,
+	}
+}
+
+func (p *Puller) Run() error {
+	if p.Follow {
+		return p.Follow()
+	} else {
+		return p.Execute()
 	}
 }
 
