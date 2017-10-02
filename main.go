@@ -61,8 +61,6 @@ func buildFqn(c *cli.Context) string {
 func executeCommand(c *cli.Context) error {
 	fqn := buildFqn(c)
 
-	interval := int(c.Uint("interval"))
-
 	ctx := context.Background()
 
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
@@ -78,12 +76,11 @@ func executeCommand(c *cli.Context) error {
 		fmt.Printf("Failed to create pubsub.Service with client %v cause of %v\n", client, err)
 		return err
 	}
-	subscriptionsService := pubsubService.Projects.Subscriptions
 
 	puller := &Puller{
-		subscriptionsService: subscriptionsService,
+		subscriptionsService: pubsubService.Projects.Subscriptions,
 		fqn:                  fqn,
-		interval:             interval,
+		interval:             int(c.Uint("interval")),
 	}
 	return puller.Follow()
 }
