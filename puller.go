@@ -49,14 +49,23 @@ func (p *Puller) Execute() error {
 			decodedData = string(decoded)
 		}
 		fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
-		ackRequest := &pubsub.AcknowledgeRequest{
-			AckIds: []string{recvMsg.AckId},
-		}
-		_, err = p.SubscriptionsService.Acknowledge(p.Fqn, ackRequest).Do()
+
+		err = p.Acknowledge(recvMsg.AckId)
 		if err != nil {
-			fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.Fqn, err)
 			return err
 		}
+	}
+	return nil
+}
+
+func (p *Puller) Acknowledge(ackId string) error {
+	ackRequest := &pubsub.AcknowledgeRequest{
+		AckIds: []string{ackId},
+	}
+	_, err := p.SubscriptionsService.Acknowledge(p.Fqn, ackRequest).Do()
+	if err != nil {
+		fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.Fqn, err)
+		return err
 	}
 	return nil
 }
