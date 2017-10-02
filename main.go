@@ -2,15 +2,17 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/urfave/cli"
 
-	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
-	"google.golang.org/api/iterator"
+	"golang.org/x/oauth2/google"
+
+	pubsub "google.golang.org/api/pubsub/v1"
 )
 
 func main() {
@@ -52,32 +54,52 @@ func executeCommand(c *cli.Context) error {
 	interval := c.Uint("interval")
 
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, proj)
-	if err != nil {
-		fmt.Println("Failed to get new pubsub client for ", proj, " cause of ", err)
-		os.Exit(1)
-	}
-	sub := client.Subscription(subscription)
-	for {
-		it, err := sub.Pull(ctx)
-		if err != nil {
-			fmt.Println("Failed to pull from ", subscription, " cause of ", err)
-			os.Exit(1)
-		}
-		// Ensure that the iterator is closed down cleanly.
-		defer it.Stop()
 
-		for {
-			m, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
+	// https://github.com/google/google-api-go-client#application-default-credentials-example
+	client, err := google.DefaultClient(ctx, pubsub.PubsubScope)
+	if err != nil {
+		fmt.Printf("Failed to google.DefaultClient with scope %v cause of %v\n", pubsub.PubsubScope, err)
+		return err
+	}
+
+	// Creates a pubsubService
+	pubsubService, err := pubsub.New(client)
+	if err != nil {
+		fmt.Printf("Failed to Failed to create pubsub.Service with client %v cause of %v\n", client, err)
+		return err
+	}
+	subscriptionsService := pubsubService.Projects.Subscriptions
+
+	fqn := "projects/" + proj + "/subscriptions/" + subscription
+	pullRequest := &pubsub.PullRequest{
+		ReturnImmediately: false,
+		MaxMessages:       1,
+	}
+	for {
+		res, err := subscriptionsService.Pull(fqn, pullRequest).Do()
+		if err != nil {
+			fmt.Printf("Failed to pull from %v cause of %v\n", fqn, err)
+			return err
+		}
+
+		for _, recvMsg := range res.ReceivedMessages {
+			m := recvMsg.Message
+			var decodedData string
+			decoded, err := base64.StdEncoding.DecodeString(m.Data)
 			if err != nil {
-				fmt.Println("Failed to get pulled message from ", subscription, " cause of ", err)
-				break
+				decodedData = fmt.Sprintf("Failed to decode data by base64 because of %v", err)
+			} else {
+				decodedData = string(decoded)
 			}
-			fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.ID, m.Attributes, m.Data)
-			m.Done(true)
+			fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
+			ackRequest := &pubsub.AcknowledgeRequest{
+				AckIds: []string{recvMsg.AckId},
+			}
+			_, err = subscriptionsService.Acknowledge(fqn, ackRequest).Do()
+			if err != nil {
+				fmt.Printf("Failed to Acknowledge to %v cause of %v\n", fqn, err)
+				return err
+			}
 		}
 
 		time.Sleep(time.Duration(interval) * time.Second)
