@@ -39,6 +39,15 @@ func main() {
 			Value: 10,
 			Usage: "Interval to pull",
 		},
+		cli.BoolFlag{
+			Name:  "return-immediately,r",
+			Usage: "Return result immediately on pull",
+		},
+		cli.UintFlag{
+			Name:  "max-messages,m",
+			Value: 10,
+			Usage: "Max messages per pull",
+		},
 	}
 
 	app.Action = executeCommand
@@ -90,6 +99,8 @@ func buildPuller(c *cli.Context) *Puller {
 		Ack:                  c.Bool("follow"),
 		Fqn:                  fqn,
 		Interval:             int(c.Uint("interval")),
+		MaxMessages:          int64(c.Uint("MaxMessages")),
+		ReturnImmediately:    c.Bool("ReturnImmediately"),
 	}
 }
 

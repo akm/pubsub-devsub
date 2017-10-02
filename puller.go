@@ -13,13 +13,15 @@ type Puller struct {
 	Ack                  bool
 	Fqn                  string
 	Interval             int
+	MaxMessages          int64
+	ReturnImmediately    bool
 	pullRequest          *pubsub.PullRequest
 }
 
 func (p *Puller) Setup() {
 	p.pullRequest = &pubsub.PullRequest{
-		ReturnImmediately: false,
-		MaxMessages:       1,
+		ReturnImmediately: p.ReturnImmediately,
+		MaxMessages:       p.MaxMessages,
 	}
 }
 
