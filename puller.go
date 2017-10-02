@@ -24,6 +24,22 @@ func (p *Puller) Setup() {
 		ReturnImmediately: p.ReturnImmediately,
 		MaxMessages:       p.MaxMessages,
 	}
+
+func (p *Puller) ShowFields() {
+	fmt.Fprintf(os.Stderr, "Puller\n"+
+		"  Ack              : %v\n"+
+		"  Follow           : %v\n"+
+		"  Fqn              : %v\n"+
+		"  Interval         : %v\n"+
+		"  MaxMessages      : %v\n"+
+		"  ReturnImmediately: %v\n"+
+		"  Verbose          : %v\n"+
+		"  pullRequest      : \n"+
+		"    MaxMessages: %v\n"+
+		"    ReturnImmediately: %v\n"+
+		"",
+		p.Ack, p.Follow, p.Fqn, p.Interval, p.MaxMessages, p.ReturnImmediately, p.Verbose,
+		p.pullRequest.MaxMessages, p.pullRequest.ReturnImmediately)
 }
 
 func (p *Puller) Run() error {
