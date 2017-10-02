@@ -94,7 +94,7 @@ func buildPuller(c *cli.Context) *Puller {
 		os.Exit(1)
 	}
 
-	return &Puller{
+	puller := &Puller{
 		SubscriptionsService: pubsubService.Projects.Subscriptions,
 		Ack:                  c.Bool("follow"),
 		Fqn:                  fqn,
@@ -102,12 +102,13 @@ func buildPuller(c *cli.Context) *Puller {
 		MaxMessages:          int64(c.Uint("MaxMessages")),
 		ReturnImmediately:    c.Bool("ReturnImmediately"),
 	}
+	puller.Setup()
+	return puller
 }
 
 func executeCommand(c *cli.Context) error {
 	puller := buildPuller(c)
 
-	puller.Setup()
 	if c.Bool("follow") {
 		return puller.Follow()
 	} else {
