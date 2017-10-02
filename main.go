@@ -66,7 +66,7 @@ func buildFqn(c *cli.Context) string {
 	}
 }
 
-func executeCommand(c *cli.Context) error {
+func buildPuller(c *cli.Context) *Puller {
 	fqn := buildFqn(c)
 
 	ctx := context.Background()
@@ -75,22 +75,27 @@ func executeCommand(c *cli.Context) error {
 	client, err := google.DefaultClient(ctx, pubsub.PubsubScope)
 	if err != nil {
 		fmt.Printf("Failed to google.DefaultClient with scope %v cause of %v\n", pubsub.PubsubScope, err)
-		return err
+		os.Exit(1)
 	}
 
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)
 	if err != nil {
 		fmt.Printf("Failed to create pubsub.Service with client %v cause of %v\n", client, err)
-		return err
+		os.Exit(1)
 	}
 
-	puller := &Puller{
+	return &Puller{
 		SubscriptionsService: pubsubService.Projects.Subscriptions,
 		Ack:                  c.Bool("follow"),
 		Fqn:                  fqn,
 		Interval:             int(c.Uint("interval")),
 	}
+}
+
+func executeCommand(c *cli.Context) error {
+	puller := buildPuller(c)
+
 	puller.Setup()
 	if c.Bool("follow") {
 		return puller.Follow()
