@@ -82,5 +82,6 @@ func executeCommand(c *cli.Context) error {
 		Fqn:                  fqn,
 		Interval:             int(c.Uint("interval")),
 	}
+	puller.Setup()
 	return puller.Follow()
 }

@@ -12,15 +12,19 @@ type Puller struct {
 	SubscriptionsService *pubsub.ProjectsSubscriptionsService
 	Fqn                  string
 	Interval             int
+	pullRequest          *pubsub.PullRequest
 }
 
-func (p *Puller) Follow() error {
-	pullRequest := &pubsub.PullRequest{
+func (p *Puller) Setup() {
+	p.pullRequest = &pubsub.PullRequest{
 		ReturnImmediately: false,
 		MaxMessages:       1,
 	}
+}
+
+func (p *Puller) Follow() error {
 	for {
-		err := p.Execute(pullRequest)
+		err := p.Execute()
 		if err != nil {
 			return err
 		}
@@ -28,8 +32,8 @@ func (p *Puller) Follow() error {
 	}
 }
 
-func (p *Puller) Execute(pullRequest *pubsub.PullRequest) error {
-	res, err := p.SubscriptionsService.Pull(p.Fqn, pullRequest).Do()
+func (p *Puller) Execute() error {
+	res, err := p.SubscriptionsService.Pull(p.Fqn, p.pullRequest).Do()
 	if err != nil {
 		fmt.Printf("Failed to pull from %v cause of %v\n", p.Fqn, err)
 		return err
