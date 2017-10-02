@@ -20,19 +20,11 @@ func main() {
 	app.Usage = "development tool for Google Cloud Pubsub"
 	app.Version = Version
 
-	app.Flags = []cli.Flag{
+	baseFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:   "project",
 			Usage:  "GCS Project ID",
 			EnvVar: "GCP_PROJECT,PROJECT",
-		},
-		cli.BoolFlag{
-			Name:  "follow,f",
-			Usage: "Keep subscribing",
-		},
-		cli.BoolFlag{
-			Name:  "ack,A",
-			Usage: "Send ACK for received message",
 		},
 		cli.UintFlag{
 			Name:  "interval",
@@ -53,6 +45,43 @@ func main() {
 			Usage: "Show debug logs",
 		},
 	}
+
+	app.Flags = append(baseFlags,
+		cli.BoolFlag{
+			Name:  "follow,f",
+			Usage: "Keep subscribing",
+		},
+		cli.BoolFlag{
+			Name:  "ack,A",
+			Usage: "Send ACK for received message",
+		},
+	)
+
+	app.Commands = []cli.Command{
+		{
+			Name:    "inspect",
+			Aliases: []string{"i"},
+			Usage:   "Pull and show messages without ACK",
+			Flags:   baseFlags,
+			Action: func(c *cli.Context) error {
+				puller := buildPuller(c)
+				puller.Ack = false
+				puller.Follow = false
+				return puller.Run()
+			},
+		},
+		{
+			Name:    "subscribe",
+			Aliases: []string{"s"},
+			Usage:   "Subscribe and show message with ACK",
+			Flags:   baseFlags,
+			Action: func(c *cli.Context) error {
+				puller := buildPuller(c)
+				puller.Ack = true
+				puller.Follow = true
+				return puller.Run()
+			},
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
