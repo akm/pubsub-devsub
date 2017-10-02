@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/urfave/cli"
@@ -18,7 +19,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "pubsub-devsub"
-	app.Usage = "github.com/groovenauts/pubsub-devsub"
+	app.Usage = "development tool for Google Cloud Pubsub"
 	app.Version = Version
 
 	app.Flags = []cli.Flag{
@@ -26,11 +27,6 @@ func main() {
 			Name:   "project",
 			Usage:  "GCS Project ID",
 			EnvVar: "GCP_PROJECT,PROJECT",
-		},
-		cli.StringFlag{
-			Name:   "subscription",
-			Usage:  "Subscription",
-			EnvVar: "SUBSCRIPTION",
 		},
 		cli.UintFlag{
 			Name:  "interval",
@@ -44,13 +40,29 @@ func main() {
 	app.Run(os.Args)
 }
 
-func executeCommand(c *cli.Context) error {
-	proj := c.String("project")
-	subscription := c.String("subscription")
-	if proj == "" || subscription == "" {
+func buildFqn(c *cli.Context) string {
+	if !c.Args().Present() {
 		cli.ShowAppHelp(c)
 		os.Exit(1)
 	}
+
+	re := regexp.MustCompile("^projects/.+/subscriptions/.+$")
+	// => [projects/proj1/subscriptions/sub1 proj1 sub1] for "projects/proj1/subscriptions/sub1"
+	if re.MatchString(c.Args().First()) {
+		return c.Args().First()
+	} else {
+		proj := c.String("project")
+		if proj == "" {
+			cli.ShowAppHelp(c)
+			os.Exit(1)
+		}
+		return fmt.Sprintf("projects/%s/subscriptions/%s", proj, c.Args().First())
+	}
+}
+
+func executeCommand(c *cli.Context) error {
+	fqn := buildFqn(c)
+
 	interval := c.Uint("interval")
 
 	ctx := context.Background()
@@ -70,7 +82,6 @@ func executeCommand(c *cli.Context) error {
 	}
 	subscriptionsService := pubsubService.Projects.Subscriptions
 
-	fqn := "projects/" + proj + "/subscriptions/" + subscription
 	pullRequest := &pubsub.PullRequest{
 		ReturnImmediately: false,
 		MaxMessages:       1,
