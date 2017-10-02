@@ -20,32 +20,39 @@ func (p *Puller) Follow() error {
 		MaxMessages:       1,
 	}
 	for {
-		res, err := p.SubscriptionsService.Pull(p.Fqn, pullRequest).Do()
+		err := p.Execute(pullRequest)
 		if err != nil {
-			fmt.Printf("Failed to pull from %v cause of %v\n", p.Fqn, err)
 			return err
 		}
-
-		for _, recvMsg := range res.ReceivedMessages {
-			m := recvMsg.Message
-			var decodedData string
-			decoded, err := base64.StdEncoding.DecodeString(m.Data)
-			if err != nil {
-				decodedData = fmt.Sprintf("Failed to decode data by base64 because of %v", err)
-			} else {
-				decodedData = string(decoded)
-			}
-			fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
-			ackRequest := &pubsub.AcknowledgeRequest{
-				AckIds: []string{recvMsg.AckId},
-			}
-			_, err = p.SubscriptionsService.Acknowledge(p.Fqn, ackRequest).Do()
-			if err != nil {
-				fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.Fqn, err)
-				return err
-			}
-		}
-
 		time.Sleep(time.Duration(p.Interval) * time.Second)
 	}
+}
+
+func (p *Puller) Execute(pullRequest *pubsub.PullRequest) error {
+	res, err := p.SubscriptionsService.Pull(p.Fqn, pullRequest).Do()
+	if err != nil {
+		fmt.Printf("Failed to pull from %v cause of %v\n", p.Fqn, err)
+		return err
+	}
+
+	for _, recvMsg := range res.ReceivedMessages {
+		m := recvMsg.Message
+		var decodedData string
+		decoded, err := base64.StdEncoding.DecodeString(m.Data)
+		if err != nil {
+			decodedData = fmt.Sprintf("Failed to decode data by base64 because of %v", err)
+		} else {
+			decodedData = string(decoded)
+		}
+		fmt.Printf("%v %s: %v %s\n", m.PublishTime, m.MessageId, m.Attributes, decodedData)
+		ackRequest := &pubsub.AcknowledgeRequest{
+			AckIds: []string{recvMsg.AckId},
+		}
+		_, err = p.SubscriptionsService.Acknowledge(p.Fqn, ackRequest).Do()
+		if err != nil {
+			fmt.Printf("Failed to Acknowledge to %v cause of %v\n", p.Fqn, err)
+			return err
+		}
+	}
+	return nil
 }
