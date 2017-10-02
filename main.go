@@ -103,8 +103,8 @@ func buildPuller(c *cli.Context) *Puller {
 		Follow:               c.Bool("follow"),
 		Fqn:                  fqn,
 		Interval:             int(c.Uint("interval")),
-		MaxMessages:          int64(c.Uint("MaxMessages")),
-		ReturnImmediately:    c.Bool("ReturnImmediately"),
+		MaxMessages:          int64(c.Uint("max-messages")),
+		ReturnImmediately:    c.Bool("return-immediately"),
 	}
 	puller.Setup()
 	return puller
