@@ -65,7 +65,7 @@ func executeCommand(c *cli.Context) error {
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)
 	if err != nil {
-		fmt.Printf("Failed to Failed to create pubsub.Service with client %v cause of %v\n", client, err)
+		fmt.Printf("Failed to create pubsub.Service with client %v cause of %v\n", client, err)
 		return err
 	}
 	subscriptionsService := pubsubService.Projects.Subscriptions
