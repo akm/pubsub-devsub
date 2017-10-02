@@ -82,6 +82,4 @@ func executeCommand(c *cli.Context) error {
 
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
-
-	return nil
 }
