@@ -26,6 +26,10 @@ func main() {
 			Usage:  "GCS Project ID",
 			EnvVar: "GCP_PROJECT,PROJECT",
 		},
+		cli.BoolFlag{
+			Name:  "follow,f",
+			Usage: "Keep subscribing",
+		},
 		cli.UintFlag{
 			Name:  "interval",
 			Value: 10,
@@ -83,5 +87,9 @@ func executeCommand(c *cli.Context) error {
 		Interval:             int(c.Uint("interval")),
 	}
 	puller.Setup()
-	return puller.Follow()
+	if c.Bool("follow") {
+		return puller.Follow()
+	} else {
+		return puller.Execute()
+	}
 }
