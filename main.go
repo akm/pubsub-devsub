@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 
 	"github.com/urfave/cli"
 
@@ -45,6 +46,7 @@ func main() {
 			Usage: "Show debug logs",
 		},
 	}
+	sort.Sort(cli.FlagsByName(baseFlags))
 
 	app.Flags = append(baseFlags,
 		cli.BoolFlag{
@@ -88,6 +90,9 @@ func main() {
 		puller := buildPuller(c)
 		return puller.Run()
 	}
+
+	sort.Sort(cli.FlagsByName(app.Flags))
+	sort.Sort(cli.CommandsByName(app.Commands))
 
 	app.Run(os.Args)
 }
