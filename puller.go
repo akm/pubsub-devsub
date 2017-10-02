@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"time"
 
 	pubsub "google.golang.org/api/pubsub/v1"
@@ -16,6 +17,7 @@ type Puller struct {
 	Interval             int
 	MaxMessages          int64
 	ReturnImmediately    bool
+	Verbose              bool
 	pullRequest          *pubsub.PullRequest
 }
 
@@ -24,6 +26,11 @@ func (p *Puller) Setup() {
 		ReturnImmediately: p.ReturnImmediately,
 		MaxMessages:       p.MaxMessages,
 	}
+
+	if p.Verbose {
+		p.ShowFields()
+	}
+}
 
 func (p *Puller) ShowFields() {
 	fmt.Fprintf(os.Stderr, "Puller\n"+

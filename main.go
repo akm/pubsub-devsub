@@ -48,6 +48,11 @@ func main() {
 			Value: 10,
 			Usage: "Max messages per pull",
 		},
+		cli.BoolFlag{
+			Name:  "verbose,V",
+			Usage: "Show debug logs",
+		},
+	}
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -105,6 +110,7 @@ func buildPuller(c *cli.Context) *Puller {
 		Interval:             int(c.Uint("interval")),
 		MaxMessages:          int64(c.Uint("max-messages")),
 		ReturnImmediately:    c.Bool("return-immediately"),
+		Verbose:              c.Bool("verbose"),
 	}
 	puller.Setup()
 	return puller
