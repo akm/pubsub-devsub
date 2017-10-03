@@ -1,6 +1,6 @@
 PKGDIR=./pkg
 BASENAME=pubsub-devsub
-VERSION=`grep VERSION version.go | cut -f2 -d\"`
+VERSION=`grep Version version.go | cut -f2 -d\"`
 OS_LIST=linux darwin
 ARCH=amd64
 UNFORMATTED=$(shell gofmt -l *.go)
